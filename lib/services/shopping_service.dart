@@ -5,13 +5,26 @@ class ShoppingService {
     'shopping_list',
   );
 
-  Stream<DatabaseEvent> getShoppingList() {
-    return _database.onValue;
+  Stream<Map<String, String>> getShoppingList() {
+    return _database.onValue.map((event) {
+      final Map<String, String> items = {};
+      DataSnapshot snapshot = event.snapshot;
+      print('Snapshot data: ${snapshot.value}');
+      if (snapshot.value != null) {
+        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          print('Key: $key'); // Print the key
+          print('Value: $value'); // Print the value
+          items[key] = value['name'] as String;
+        });
+      }
+      return items;
+    });
   }
 
-  Future<void> addShoppingItem(String name) async {
-    await _database.push().set({
-      'name': name,
+  void addShoppingItem(String itemName) {
+    _database.push().set({
+      'name': itemName,
     });
   }
 

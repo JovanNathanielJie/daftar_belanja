@@ -58,45 +58,32 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               const SizedBox(height: 8),
 
               Expanded(
-                child: StreamBuilder<DatabaseEvent>(
+                child: StreamBuilder<Map<String, String>>(
                   stream: _shoppingService.getShoppingList(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.hasData) {
+                      Map<String, String> items = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final key = items.keys.elementAt(index);
+                          final item = items[key]!;
+                          return ListTile(
+                            title: Text(item),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                _shoppingService.removeShoppingItem(key);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    } else {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    final data = snapshot.data?.snapshot.value;
-
-                    if (data == null) {
-                      return const Center(child: Text('Belum ada item.'));
-                    }
-
-                    final Map<dynamic, dynamic> itemsMap =
-                        data as Map<dynamic, dynamic>;
-                    final items = itemsMap.entries.toList();
-
-                    return ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final key = items[index].key as String;
-                        final item = Map<String, dynamic>.from(
-                          items[index].value as Map,
-                        );
-                        final String name = item['name'] ?? '';
-
-                        return ListTile(
-                          title: Text(name),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              _shoppingService.removeShoppingItem(key);
-                            },
-                          ),
-                        );
-                      },
-                    );
                   },
                 ),
               ),
