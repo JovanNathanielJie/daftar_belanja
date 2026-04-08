@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:firebase_database/firebase_database.dart";
 import "package:daftar_belanja/services/shopping_service.dart";
 
 class ShoppingListScreen extends StatefulWidget {
